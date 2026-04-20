@@ -8,6 +8,7 @@ import sqlite3
 import math
 import random
 import time
+import requests
 from datetime import datetime, timedelta
 
 app = Flask(__name__)
@@ -66,45 +67,41 @@ def get_settings():
 # ─────────────────────────────────────────────
 # CANDLE DATA SIMULATION (Realistic OHLCV)
 # ─────────────────────────────────────────────
-def generate_candles(asset, n=100, timeframe="1m"):
-    """
-    Generate realistic OHLCV candle data using a random walk model.
-    In production, replace this with a live data feed (e.g. Binance, Polygon.io, etc.)
-    """
-    seed = sum(ord(c) for c in asset) + int(time.time() / 60)
-    random.seed(seed)
 
-    base_prices = {
-        "EUR/USD": 1.0850, "GBP/USD": 1.2650, "USD/JPY": 149.50,
-        "AUD/USD": 0.6580, "EUR/GBP": 0.8580,
-        "BTC/USD": 67500.0, "ETH/USD": 3400.0, "XRP/USD": 0.5820,
-        "EUR/USD-OTC": 1.0848, "GBP/USD-OTC": 1.2648,
-        "USD/CHF": 0.9020, "NZD/USD": 0.6080,
+def generate_candles(asset, n=100, timeframe="5min"):
+    API_KEY = "QDPMSJTAE3WVURK3"
+
+    asset_map = {
+        "EUR/USD": ("EUR", "USD"),
+        "GBP/USD": ("GBP", "USD"),
+        "AUD/USD": ("AUD", "USD"),
+        "USD/JPY": ("USD", "JPY"),
     }
-    price = base_prices.get(asset, 1.0000)
-    volatility = price * 0.0008
+
+    if asset not in asset_map:
+        return []
+
+    from_symbol, to_symbol = asset_map[asset]
+
+    url = f"https://www.alphavantage.co/query?function=FX_INTRADAY&from_symbol={from_symbol}&to_symbol={to_symbol}&interval=5min&apikey={API_KEY}"
+
+    response = requests.get(url)
+    data = response.json()
 
     candles = []
-    for i in range(n):
-        open_ = price
-        move = random.gauss(0, volatility)
-        high = open_ + abs(random.gauss(0, volatility * 0.8))
-        low = open_ - abs(random.gauss(0, volatility * 0.8))
-        close = open_ + move
-        high = max(high, open_, close)
-        low = min(low, open_, close)
-        volume = random.randint(800, 5000)
+    time_series = data.get("Time Series FX (5min)", {})
+
+    for time_key, values in list(time_series.items())[:100]:
         candles.append({
-            "open": round(open_, 5),
-            "high": round(high, 5),
-            "low": round(low, 5),
-            "close": round(close, 5),
-            "volume": volume,
+            "open": float(values["1. open"]),
+            "high": float(values["2. high"]),
+            "low": float(values["3. low"]),
+            "close": float(values["4. close"]),
+            "volume": 1000
         })
-        price = close
 
+    candles.reverse()
     return candles
-
 
 # ─────────────────────────────────────────────
 # TECHNICAL INDICATOR FUNCTIONS
