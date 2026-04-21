@@ -3,29 +3,29 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Smart Signal Pro — OTC & Forex Trading Dashboard</title>
+<title>Smart Signal Pro v2 — Prediction Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap"/>
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"/>
 </head>
 <body>
 
-<!-- ══════════════════════ HEADER ══════════════════════ -->
+<!-- HEADER -->
 <header class="header">
   <div class="header-left">
     <div class="logo">
       <span class="logo-icon">◈</span>
-      <span class="logo-text">Smart<span class="accent">Signal</span>Pro</span>
+      <span class="logo-text">Smart<span class="accent">Signal</span>Pro <small style="font-size:11px;color:var(--text-muted);font-weight:400">v2</small></span>
     </div>
     <div class="market-status">
       <span class="status-dot pulse"></span>
-      <span id="market-status-text">MARKET LIVE</span>
+      <span id="market-status-text">PREDICTION ENGINE ACTIVE</span>
     </div>
   </div>
   <div class="header-center">
     <div class="timeframe-selector">
-      <button class="tf-btn active" data-tf="1m">1M</button>
-      <button class="tf-btn" data-tf="5m">5M</button>
+      <button class="tf-btn" data-tf="1m">1M</button>
+      <button class="tf-btn active" data-tf="5m">5M</button>
       <button class="tf-btn" data-tf="15m">15M</button>
       <button class="tf-btn" data-tf="30m">30M</button>
     </div>
@@ -36,42 +36,21 @@
   </div>
 </header>
 
-<!-- ══════════════════════ STATS BAR ══════════════════════ -->
+<!-- STATS BAR -->
 <div class="stats-bar">
-  <div class="stat-item">
-    <span class="stat-label">TOTAL SIGNALS</span>
-    <span class="stat-value" id="stat-total">0</span>
-  </div>
-  <div class="stat-item">
-    <span class="stat-label">WIN RATE</span>
-    <span class="stat-value win" id="stat-winrate">—</span>
-  </div>
-  <div class="stat-item">
-    <span class="stat-label">WINS</span>
-    <span class="stat-value win" id="stat-wins">0</span>
-  </div>
-  <div class="stat-item">
-    <span class="stat-label">LOSSES</span>
-    <span class="stat-value loss" id="stat-losses">0</span>
-  </div>
-  <div class="stat-item">
-    <span class="stat-label">BUY SIGNALS</span>
-    <span class="stat-value buy" id="stat-buys">0</span>
-  </div>
-  <div class="stat-item">
-    <span class="stat-label">SELL SIGNALS</span>
-    <span class="stat-value sell" id="stat-sells">0</span>
-  </div>
-  <div class="stat-item">
-    <span class="stat-label">REFRESH IN</span>
-    <span class="stat-value accent" id="stat-countdown">30s</span>
-  </div>
+  <div class="stat-item"><span class="stat-label">Total Signals</span><span class="stat-value accent" id="stat-total">0</span></div>
+  <div class="stat-item"><span class="stat-label">Win Rate</span><span class="stat-value win" id="stat-winrate">—</span></div>
+  <div class="stat-item"><span class="stat-label">Wins</span><span class="stat-value win" id="stat-wins">0</span></div>
+  <div class="stat-item"><span class="stat-label">Losses</span><span class="stat-value loss" id="stat-losses">0</span></div>
+  <div class="stat-item"><span class="stat-label">Buy</span><span class="stat-value buy" id="stat-buys">0</span></div>
+  <div class="stat-item"><span class="stat-label">Sell</span><span class="stat-value sell" id="stat-sells">0</span></div>
+  <div class="stat-item"><span class="stat-label">Next Update</span><span class="stat-value accent" id="stat-countdown">5:00</span></div>
 </div>
 
-<!-- ══════════════════════ MAIN LAYOUT ══════════════════════ -->
+<!-- MAIN LAYOUT -->
 <main class="main-layout">
 
-  <!-- LEFT: Signal Cards Grid -->
+  <!-- LEFT: Signal Cards -->
   <section class="signals-section">
     <div class="section-header">
       <h2>Live Signals <span class="badge" id="signal-count">0</span></h2>
@@ -83,10 +62,9 @@
       </div>
     </div>
     <div class="signals-grid" id="signals-grid">
-      <!-- Injected by JS -->
       <div class="loading-state">
         <div class="spinner"></div>
-        <p>Analyzing markets…</p>
+        <p>Running prediction engine…</p>
       </div>
     </div>
   </section>
@@ -94,13 +72,19 @@
   <!-- RIGHT: Detail Panel -->
   <aside class="detail-panel">
 
-    <!-- Mini Chart -->
+    <!-- Prediction Chart (taller than v1) -->
     <div class="panel-card chart-card">
       <div class="card-title">
-        <span>Price Chart</span>
-        <span id="chart-asset-label" class="accent">EUR/USD</span>
+        <span>Prediction Chart</span>
+        <span id="chart-asset-label" class="accent">Click a signal</span>
       </div>
-      <canvas id="mini-chart" width="340" height="160"></canvas>
+      <!-- Height 200 to accommodate history + forecast bars -->
+      <canvas id="mini-chart" width="360" height="200"></canvas>
+      <div style="display:flex;gap:12px;margin-top:8px;font-size:10px;color:var(--text-muted);font-family:var(--font-mono)">
+        <span>◼ History</span>
+        <span style="color:var(--accent)">◼ Forecast</span>
+        <span style="color:var(--text-muted)">░ Confidence Band</span>
+      </div>
     </div>
 
     <!-- Indicator Status -->
@@ -113,14 +97,14 @@
 
     <!-- Signal Detail -->
     <div class="panel-card" id="signal-detail-card" style="display:none">
-      <div class="card-title">Signal Detail</div>
+      <div class="card-title">Signal & Prediction Detail</div>
       <div id="signal-detail-body"></div>
     </div>
 
   </aside>
 </main>
 
-<!-- ══════════════════════ HISTORY TABLE ══════════════════════ -->
+<!-- HISTORY -->
 <section class="history-section">
   <div class="section-header">
     <h2>Signal History</h2>
@@ -131,17 +115,18 @@
       <thead>
         <tr>
           <th>#</th><th>Asset</th><th>Signal</th><th>Strength</th>
-          <th>TF</th><th>Risk</th><th>Confirms</th><th>Time</th><th>Result</th>
+          <th>TF</th><th>Risk</th><th>Confirms</th>
+          <th>Predicted</th><th>Time</th><th>Result</th>
         </tr>
       </thead>
       <tbody id="history-body">
-        <tr><td colspan="9" class="empty-row">No history yet…</td></tr>
+        <tr><td colspan="10" class="empty-row">No history yet…</td></tr>
       </tbody>
     </table>
   </div>
 </section>
 
-<!-- ══════════════════════ SETTINGS MODAL ══════════════════════ -->
+<!-- SETTINGS MODAL -->
 <div class="modal-overlay" id="settings-modal" onclick="closeSettingsOutside(event)">
   <div class="modal">
     <div class="modal-header">
@@ -150,24 +135,12 @@
     </div>
     <div class="modal-body">
       <div class="settings-grid">
-        <label>RSI Oversold Level
-          <input type="number" id="s-rsi-oversold" min="10" max="40" value="30"/>
-        </label>
-        <label>RSI Overbought Level
-          <input type="number" id="s-rsi-overbought" min="60" max="90" value="70"/>
-        </label>
-        <label>Min. Confirmations Required
-          <input type="number" id="s-min-conf" min="2" max="8" value="4"/>
-        </label>
-        <label>Auto-Refresh Interval (sec)
-          <input type="number" id="s-interval" min="10" max="120" value="30"/>
-        </label>
-        <label>Low Risk Threshold (%)
-          <input type="number" id="s-risk-low" min="50" max="70" value="60"/>
-        </label>
-        <label>Medium Risk Threshold (%)
-          <input type="number" id="s-risk-med" min="70" max="90" value="75"/>
-        </label>
+        <label>RSI Oversold Level<input type="number" id="s-rsi-oversold" min="10" max="40" value="30"/></label>
+        <label>RSI Overbought Level<input type="number" id="s-rsi-overbought" min="60" max="90" value="70"/></label>
+        <label>Min Confirmations<input type="number" id="s-min-conf" min="2" max="8" value="4"/></label>
+        <label>Signal Window (sec)<input type="number" id="s-interval" min="60" max="600" value="300"/></label>
+        <label>Low Risk Threshold %<input type="number" id="s-risk-low" min="50" max="70" value="60"/></label>
+        <label>Medium Risk Threshold %<input type="number" id="s-risk-med" min="70" max="90" value="75"/></label>
       </div>
     </div>
     <div class="modal-footer">
@@ -177,9 +150,8 @@
   </div>
 </div>
 
-<!-- ══════════════════════ TOAST ══════════════════════ -->
 <div class="toast" id="toast"></div>
-
 <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
+
