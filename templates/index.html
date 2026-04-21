@@ -3,23 +3,23 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Smart Signal Pro v2 — Prediction Dashboard</title>
+<title>Smart Signal Pro — OTC & Forex Prediction Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap"/>
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"/>
 </head>
 <body>
 
-<!-- HEADER -->
+<!-- ══ HEADER ══ -->
 <header class="header">
   <div class="header-left">
     <div class="logo">
       <span class="logo-icon">◈</span>
-      <span class="logo-text">Smart<span class="accent">Signal</span>Pro <small style="font-size:11px;color:var(--text-muted);font-weight:400">v2</small></span>
+      <span class="logo-text">Smart<span class="accent">Signal</span>Pro</span>
     </div>
     <div class="market-status">
       <span class="status-dot pulse"></span>
-      <span id="market-status-text">PREDICTION ENGINE ACTIVE</span>
+      <span id="market-status-text">SIGNALS LIVE</span>
     </div>
   </div>
   <div class="header-center">
@@ -36,21 +36,21 @@
   </div>
 </header>
 
-<!-- STATS BAR -->
+<!-- ══ STATS BAR ══ -->
 <div class="stats-bar">
-  <div class="stat-item"><span class="stat-label">Total Signals</span><span class="stat-value accent" id="stat-total">0</span></div>
-  <div class="stat-item"><span class="stat-label">Win Rate</span><span class="stat-value win" id="stat-winrate">—</span></div>
-  <div class="stat-item"><span class="stat-label">Wins</span><span class="stat-value win" id="stat-wins">0</span></div>
-  <div class="stat-item"><span class="stat-label">Losses</span><span class="stat-value loss" id="stat-losses">0</span></div>
-  <div class="stat-item"><span class="stat-label">Buy</span><span class="stat-value buy" id="stat-buys">0</span></div>
-  <div class="stat-item"><span class="stat-label">Sell</span><span class="stat-value sell" id="stat-sells">0</span></div>
+  <div class="stat-item"><span class="stat-label">Signals</span><span class="stat-value accent" id="stat-total">0</span></div>
+  <div class="stat-item"><span class="stat-label">Win Rate</span><span class="stat-value win"    id="stat-winrate">—</span></div>
+  <div class="stat-item"><span class="stat-label">Wins</span><span class="stat-value win"         id="stat-wins">0</span></div>
+  <div class="stat-item"><span class="stat-label">Losses</span><span class="stat-value loss"      id="stat-losses">0</span></div>
+  <div class="stat-item"><span class="stat-label">Buy</span><span class="stat-value buy"           id="stat-buys">0</span></div>
+  <div class="stat-item"><span class="stat-label">Sell</span><span class="stat-value sell"         id="stat-sells">0</span></div>
   <div class="stat-item"><span class="stat-label">Next Update</span><span class="stat-value accent" id="stat-countdown">5:00</span></div>
 </div>
 
-<!-- MAIN LAYOUT -->
+<!-- ══ MAIN LAYOUT ══ -->
 <main class="main-layout">
 
-  <!-- LEFT: Signal Cards -->
+  <!-- LEFT: cards -->
   <section class="signals-section">
     <div class="section-header">
       <h2>Live Signals <span class="badge" id="signal-count">0</span></h2>
@@ -69,42 +69,42 @@
     </div>
   </section>
 
-  <!-- RIGHT: Detail Panel -->
+  <!-- RIGHT: detail panel -->
   <aside class="detail-panel">
 
-    <!-- Prediction Chart (taller than v1) -->
+    <!-- Prediction Chart -->
     <div class="panel-card chart-card">
       <div class="card-title">
         <span>Prediction Chart</span>
-        <span id="chart-asset-label" class="accent">Click a signal</span>
+        <span id="chart-asset-label" class="accent">Click a signal card</span>
       </div>
-      <!-- Height 200 to accommodate history + forecast bars -->
-      <canvas id="mini-chart" width="360" height="200"></canvas>
-      <div style="display:flex;gap:12px;margin-top:8px;font-size:10px;color:var(--text-muted);font-family:var(--font-mono)">
+      <canvas id="mini-chart" width="360" height="210"></canvas>
+      <div class="chart-legend">
         <span>◼ History</span>
-        <span style="color:var(--accent)">◼ Forecast</span>
-        <span style="color:var(--text-muted)">░ Confidence Band</span>
+        <span style="color:var(--accent)">| NOW |</span>
+        <span style="color:#ffb300">◼ Forecast</span>
+        <span style="opacity:.5">░ Confidence band</span>
       </div>
     </div>
 
-    <!-- Indicator Status -->
+    <!-- Indicator Panel -->
     <div class="panel-card">
       <div class="card-title">Indicator Analysis</div>
       <div class="indicator-grid" id="indicator-grid">
-        <div class="ind-placeholder">Select a signal card</div>
+        <div class="ind-placeholder">Select a signal card to analyse</div>
       </div>
     </div>
 
     <!-- Signal Detail -->
     <div class="panel-card" id="signal-detail-card" style="display:none">
-      <div class="card-title">Signal & Prediction Detail</div>
+      <div class="card-title">Signal Detail</div>
       <div id="signal-detail-body"></div>
     </div>
 
   </aside>
 </main>
 
-<!-- HISTORY -->
+<!-- ══ HISTORY TABLE ══ -->
 <section class="history-section">
   <div class="section-header">
     <h2>Signal History</h2>
@@ -116,17 +116,18 @@
         <tr>
           <th>#</th><th>Asset</th><th>Signal</th><th>Strength</th>
           <th>TF</th><th>Risk</th><th>Confirms</th>
-          <th>Predicted</th><th>Time</th><th>Result</th>
+          <th>Entry</th><th>Target</th><th>Expiry</th>
+          <th>Time</th><th>Result</th>
         </tr>
       </thead>
       <tbody id="history-body">
-        <tr><td colspan="10" class="empty-row">No history yet…</td></tr>
+        <tr><td colspan="12" class="empty-row">No history yet…</td></tr>
       </tbody>
     </table>
   </div>
 </section>
 
-<!-- SETTINGS MODAL -->
+<!-- ══ SETTINGS MODAL ══ -->
 <div class="modal-overlay" id="settings-modal" onclick="closeSettingsOutside(event)">
   <div class="modal">
     <div class="modal-header">
@@ -135,12 +136,24 @@
     </div>
     <div class="modal-body">
       <div class="settings-grid">
-        <label>RSI Oversold Level<input type="number" id="s-rsi-oversold" min="10" max="40" value="30"/></label>
-        <label>RSI Overbought Level<input type="number" id="s-rsi-overbought" min="60" max="90" value="70"/></label>
-        <label>Min Confirmations<input type="number" id="s-min-conf" min="2" max="8" value="4"/></label>
-        <label>Signal Window (sec)<input type="number" id="s-interval" min="60" max="600" value="300"/></label>
-        <label>Low Risk Threshold %<input type="number" id="s-risk-low" min="50" max="70" value="60"/></label>
-        <label>Medium Risk Threshold %<input type="number" id="s-risk-med" min="70" max="90" value="75"/></label>
+        <label>RSI Oversold Level
+          <input type="number" id="s-rsi-oversold" min="10" max="40" value="30"/>
+        </label>
+        <label>RSI Overbought Level
+          <input type="number" id="s-rsi-overbought" min="60" max="90" value="70"/>
+        </label>
+        <label>Min Confirmations (6 = high accuracy)
+          <input type="number" id="s-min-conf" min="3" max="10" value="6"/>
+        </label>
+        <label>Signal Window (seconds)
+          <input type="number" id="s-interval" min="60" max="600" value="300"/>
+        </label>
+        <label>LOW Risk Threshold %
+          <input type="number" id="s-risk-low" min="60" max="90" value="70"/>
+        </label>
+        <label>MEDIUM Risk Threshold %
+          <input type="number" id="s-risk-med" min="40" max="70" value="55"/>
+        </label>
       </div>
     </div>
     <div class="modal-footer">
@@ -154,4 +167,3 @@
 <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
-
