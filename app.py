@@ -604,7 +604,7 @@ entry_timing = calc_entry_timing(
 expiry = calc_expiry_suggestion(
     prediction["confidence"]
 )
-    return {
+return {
         "predicted_close": round(predicted_close, 5),
         "predicted_high": round(predicted_high, 5),
         "predicted_low": round(predicted_low, 5),
