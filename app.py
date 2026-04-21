@@ -9,6 +9,7 @@ import sqlite3
 import math
 import random
 import time
+import requests
 from datetime import datetime
 
 app = Flask(__name__)
@@ -62,49 +63,38 @@ BASE_PRICES = {
     "USD/CHF":0.9020,"NZD/USD":0.6080,
 }
 
+import requests
+
 def generate_candles(asset, n=120):
-    """
-    Generates 120 historical candles locked to 5-minute window seed.
-    Seed is stable within the window → signals don't flip on refresh.
-    """
-    window = int(time.time() / 300)          # changes every 5 min
-    asset_seed = sum(ord(ch) for ch in asset)
-    random.seed((window * 9973 + asset_seed) & 0xFFFFFFFF)
+    API_KEY = "QDPMSJTAE3WVURK3"
 
-    price = BASE_PRICES.get(asset, 1.0)
-    vol   = price * 0.0007
+    symbol = asset.replace("/", "").replace("-OTC", "")
 
-    # Add realistic trend phases: 40 bars trending, rest noisy
-    trend_phase = random.choice(["UP", "DOWN", "SIDEWAYS"])
-    trend_strength = random.uniform(0.0001, 0.0004) * price
+    if len(symbol) < 6:
+        return []
+
+    from_symbol = symbol[:3]
+    to_symbol = symbol[3:]
+
+    url = f"https://www.alphavantage.co/query?function=FX_INTRADAY&from_symbol={from_symbol}&to_symbol={to_symbol}&interval=5min&apikey={API_KEY}&outputsize=compact"
+
+    response = requests.get(url)
+    data = response.json()
+
+    series = data.get("Time Series FX (5min)", {})
 
     candles = []
-    for i in range(n):
-        open_ = price
-        if trend_phase == "UP":
-            drift = trend_strength * random.uniform(0.3, 1.2)
-        elif trend_phase == "DOWN":
-            drift = -trend_strength * random.uniform(0.3, 1.2)
-        else:
-            drift = random.gauss(0, vol * 0.2)
 
-        noise  = random.gauss(0, vol)
-        move   = drift + noise
-        close  = open_ + move
-        high   = max(open_, close) + abs(random.gauss(0, vol * 0.5))
-        low    = min(open_, close) - abs(random.gauss(0, vol * 0.5))
-        volume = random.randint(800, 5000)
+    for ts, v in list(series.items())[:n]:
         candles.append({
-            "open": round(open_, 5), "high": round(high, 5),
-            "low": round(low, 5),   "close": round(close, 5),
-            "volume": volume
+            "open": float(v["1. open"]),
+            "high": float(v["2. high"]),
+            "low": float(v["3. low"]),
+            "close": float(v["4. close"]),
+            "volume": 1000
         })
-        price = close
-        # Flip trend occasionally
-        if i == 40 or i == 80:
-            trend_phase = random.choice(["UP","DOWN","SIDEWAYS"])
 
-    return candles
+    return list(reversed(candles))
 
 
 # ─────────────────────────────────────────────
