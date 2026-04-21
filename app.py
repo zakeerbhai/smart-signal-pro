@@ -593,13 +593,6 @@ expiry = calc_expiry_suggestion(
         "predicted_low": round(predicted_low, 5),
         "target_pips": target_pips,
         "confidence": confidence
-        "predicted_close": prediction["predicted_close"],
-        "predicted_high": prediction["predicted_high"],
-        "predicted_low": prediction["predicted_low"],
-        "target_pips": prediction["target_pips"],
-        "confidence_score": prediction["confidence"],
-        "entry_timing": entry_timing,
-        "expiry_suggestion": expiry,
     }
 
 
