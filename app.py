@@ -118,30 +118,37 @@ VOLATILITY = {
 def generate_candles(asset, n=150):
     API_KEY = "dd455a151e4f440f86cf64c77511b5d7"
 
-    symbol = asset.replace("/", "").replace(" (OTC)", "")
+    # Remove OTC text and prepare symbol
+    symbol = asset.replace(" (OTC)", "").replace("/", "")
 
-    from_symbol = symbol[:3]
-    to_symbol = symbol[3:]
+    # Convert EURUSD → EUR/USD
+    if len(symbol) >= 6:
+        symbol = symbol[:3] + "/" + symbol[3:6]
 
-    url = f"https://www.alphavantage.co/query?function=FX_INTRADAY&from_symbol={from_symbol}&to_symbol={to_symbol}&interval=5min&apikey={API_KEY}&outputsize=compact"
+    url = f"https://api.twelvedata.com/time_series?symbol={symbol}&interval=5min&outputsize={n}&apikey={API_KEY}"
 
     response = requests.get(url)
     data = response.json()
 
-    series = data.get("Time Series FX (5min)", {})
+    values = data.get("values", [])
 
     candles = []
 
-    for ts, v in list(series.items())[:n]:
+    for v in reversed(values):
         candles.append({
-            "open": float(v["1. open"]),
-            "high": float(v["2. high"]),
-            "low": float(v["3. low"]),
-            "close": float(v["4. close"]),
-            "volume": 1000
+            "open": float(v["open"]),
+            "high": float(v["high"]),
+            "low": float(v["low"]),
+            "close": float(v["close"]),
+            "volume": float(v.get("volume", 1000))
         })
 
-    return list(reversed(candles))
+    # Safety fallback if API fails
+    if not candles:
+        print("Twelve Data API failed:", data)
+        return []
+
+    return candles
 
 # ─────────────────────────────────────────────
 # INDICATOR LIBRARY
