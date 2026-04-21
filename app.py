@@ -116,7 +116,7 @@ VOLATILITY = {
 
 
 def generate_candles(asset, n=150):
-    API_KEY = "QDPMSJTAE3WVURK3"
+    API_KEY = "dd455a151e4f440f86cf64c77511b5d7"
 
     symbol = asset.replace("/", "").replace(" (OTC)", "")
 
