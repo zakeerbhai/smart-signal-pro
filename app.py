@@ -118,17 +118,20 @@ VOLATILITY = {
 def generate_candles(asset, n=150):
     API_KEY = "dd455a151e4f440f86cf64c77511b5d7"
 
-    # Remove OTC text and prepare symbol
-    symbol = asset.replace(" (OTC)", "").replace("/", "")
+    # Remove OTC if exists
+    clean_asset = asset.replace(" (OTC)", "").strip()
 
-    # Convert EURUSD → EUR/USD
-    if len(symbol) >= 6:
-        symbol = symbol[:3] + "/" + symbol[3:6]
+    # Keep proper forex format like EUR/USD
+    symbol = clean_asset
 
     url = f"https://api.twelvedata.com/time_series?symbol={symbol}&interval=5min&outputsize={n}&apikey={API_KEY}"
 
+    print("REQUEST URL:", url)
+
     response = requests.get(url)
     data = response.json()
+
+    print("API RESPONSE:", data)
 
     values = data.get("values", [])
 
@@ -143,10 +146,25 @@ def generate_candles(asset, n=150):
             "volume": float(v.get("volume", 1000))
         })
 
-    # Safety fallback if API fails
+    # fallback if API fails
     if not candles:
-        print("Twelve Data API failed:", data)
-        return []
+        print("API failed, using fallback candles")
+
+        base = BASE_PRICES.get(asset, 1.0000)
+        candles = []
+
+        for i in range(n):
+            price = base + random.uniform(-0.002, 0.002)
+
+            candles.append({
+                "open": round(price, 5),
+                "high": round(price + 0.0005, 5),
+                "low": round(price - 0.0005, 5),
+                "close": round(price + random.uniform(-0.0003, 0.0003), 5),
+                "volume": 1000
+            })
+
+        return candles
 
     return candles
 
