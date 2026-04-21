@@ -9,6 +9,7 @@ Smart Signal Pro — FINAL VERSION
 
 from flask import Flask, render_template, jsonify, request
 import sqlite3, math, random, time
+import requests
 from datetime import datetime
 
 app = Flask(__name__)
@@ -112,59 +113,35 @@ VOLATILITY = {
 # CANDLE GENERATION — 5-MINUTE LOCKED SEED
 # Signal stays identical for entire 5-minute window
 # ─────────────────────────────────────────────
-def generate_candles(asset, n=150):
-    """
-    Generates n realistic OHLCV candles.
-    Seed = 5-minute window + asset → stable within window, changes on next window.
-    Simulates realistic trending + ranging behaviour in phases.
-    """
-    window    = int(time.time() / 300)          # one window per 5 minutes
-    asset_int = sum(ord(ch) for ch in asset)
-    seed      = (window * 104729 + asset_int * 6271) & 0x7FFFFFFF
-    random.seed(seed)
 
-    price = BASE_PRICES.get(asset, 1.0)
-    vol   = VOLATILITY.get(asset, price * 0.0003)
+
+def generate_candles(asset, n=150):
+    API_KEY = "QDPMSJTAE3WVURK3"
+
+    symbol = asset.replace("/", "").replace(" (OTC)", "")
+
+    from_symbol = symbol[:3]
+    to_symbol = symbol[3:]
+
+    url = f"https://www.alphavantage.co/query?function=FX_INTRADAY&from_symbol={from_symbol}&to_symbol={to_symbol}&interval=5min&apikey={API_KEY}&outputsize=compact"
+
+    response = requests.get(url)
+    data = response.json()
+
+    series = data.get("Time Series FX (5min)", {})
 
     candles = []
-    # Build realistic multi-phase price action
-    phase_len  = n // 3
-    phases     = [random.choice(["TREND_UP","TREND_DOWN","RANGE"]) for _ in range(3)]
 
-    for i in range(n):
-        phase = phases[i // phase_len] if i // phase_len < 3 else phases[2]
-
-        if phase == "TREND_UP":
-            drift = vol * random.uniform(0.05, 0.25)
-        elif phase == "TREND_DOWN":
-            drift = -vol * random.uniform(0.05, 0.25)
-        else:
-            drift = vol * random.gauss(0, 0.15)
-
-        noise  = random.gauss(0, vol * 0.6)
-        move   = drift + noise
-        open_  = price
-        close  = open_ + move
-        wick_u = abs(random.gauss(0, vol * 0.4))
-        wick_d = abs(random.gauss(0, vol * 0.4))
-        high   = max(open_, close) + wick_u
-        low    = min(open_, close) - wick_d
-        volume = int(random.gauss(2500, 800))
-        volume = max(500, volume)
-
-        # Round to correct decimal places per asset
-        dp = 3 if "JPY" in asset or "BTC" in asset or "ETH" in asset else 5
+    for ts, v in list(series.items())[:n]:
         candles.append({
-            "open":   round(open_, dp),
-            "high":   round(high,  dp),
-            "low":    round(low,   dp),
-            "close":  round(close, dp),
-            "volume": volume,
+            "open": float(v["1. open"]),
+            "high": float(v["2. high"]),
+            "low": float(v["3. low"]),
+            "close": float(v["4. close"]),
+            "volume": 1000
         })
-        price = close
 
-    return candles
-
+    return list(reversed(candles))
 
 # ─────────────────────────────────────────────
 # INDICATOR LIBRARY
