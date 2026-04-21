@@ -516,6 +516,16 @@ def generate_signal(asset, timeframe, settings):
     entry_info  = calc_entry_timing(final_sig, timeframe, strength)
 
     # ── Return everything ──
+    prediction = predict_next_candles(candles)
+
+    entry_timing = calc_entry_timing(
+        signal,
+        prediction["confidence"]
+    )
+
+    expiry = calc_expiry_suggestion(
+        prediction["confidence"]
+    )
     return {
         "asset":            asset,
         "signal":           final_sig,
@@ -545,7 +555,14 @@ def generate_signal(asset, timeframe, settings):
         "entry_in":         entry_info["entry_in"],
         "expiry_minutes":   entry_info["expiry_minutes"],
         "entry_quality":    entry_info["quality"],
-    }
+        "predicted_close": prediction["predicted_close"],
+        "predicted_high": prediction["predicted_high"],
+        "predicted_low": prediction["predicted_low"],
+        "target_pips": prediction["target_pips"],
+        "confidence_score": prediction["confidence"],
+        "entry_timing": entry_timing,
+        "expiry_suggestion": expiry,
+        }
 
 def predict_next_candles(candles):
     if len(candles) < 20:
