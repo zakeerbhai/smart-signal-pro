@@ -594,22 +594,27 @@ def predict_next_candles(candles):
     target_pips = round(abs(predicted_close - last_close) * 10000, 1)
 
     confidence = min(95, max(60, int(abs(trend_strength) * 10000)))
-prediction = predict_next_candles(candles)
+    prediction = predict_next_candles(candles)
 
-entry_timing = calc_entry_timing(
-    signal,
-    prediction["confidence"]
-)
+    entry_timing = calc_entry_timing(
+        signal,
+        prediction["confidence"]
+    )
 
-expiry = calc_expiry_suggestion(
-    prediction["confidence"]
-)
-return {
-        "predicted_close": round(predicted_close, 5),
-        "predicted_high": round(predicted_high, 5),
-        "predicted_low": round(predicted_low, 5),
-        "target_pips": target_pips,
-        "confidence": confidence
+    expiry = calc_expiry_suggestion(
+        prediction["confidence"]
+    )
+    return {
+                "asset": asset,
+        "signal": signal,
+        "strength": strength,
+        "predicted_close": prediction["predicted_close"],
+        "predicted_high": prediction["predicted_high"],
+        "predicted_low": prediction["predicted_low"],
+        "target_pips": prediction["target_pips"],
+        "confidence_score": prediction["confidence"],
+        "entry_timing": entry_timing,
+        "expiry_suggestion": expiry
     }
 
 
