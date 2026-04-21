@@ -547,7 +547,78 @@ def generate_signal(asset, timeframe, settings):
         "entry_quality":    entry_info["quality"],
     }
 
+def predict_next_candles(candles):
+    if len(candles) < 20:
+        return {
+            "predicted_close": 0,
+            "predicted_high": 0,
+            "predicted_low": 0,
+            "target_pips": 0,
+            "confidence": 50
+        }
 
+    closes = [c["close"] for c in candles[-20:]]
+    highs = [c["high"] for c in candles[-20:]]
+    lows = [c["low"] for c in candles[-20:]]
+
+    last_close = closes[-1]
+
+    avg_move = sum([
+        abs(closes[i] - closes[i - 1])
+        for i in range(1, len(closes))
+    ]) / (len(closes) - 1)
+
+    trend_strength = closes[-1] - closes[0]
+
+    predicted_close = last_close + (avg_move if trend_strength > 0 else -avg_move)
+    predicted_high = max(highs[-5:]) + avg_move
+    predicted_low = min(lows[-5:]) - avg_move
+
+    target_pips = round(abs(predicted_close - last_close) * 10000, 1)
+
+    confidence = min(95, max(60, int(abs(trend_strength) * 10000)))
+prediction = predict_next_candles(candles)
+
+entry_timing = calc_entry_timing(
+    signal,
+    prediction["confidence"]
+)
+
+expiry = calc_expiry_suggestion(
+    prediction["confidence"]
+)
+    return {
+        "predicted_close": round(predicted_close, 5),
+        "predicted_high": round(predicted_high, 5),
+        "predicted_low": round(predicted_low, 5),
+        "target_pips": target_pips,
+        "confidence": confidence
+        "predicted_close": prediction["predicted_close"],
+        "predicted_high": prediction["predicted_high"],
+        "predicted_low": prediction["predicted_low"],
+        "target_pips": prediction["target_pips"],
+        "confidence_score": prediction["confidence"],
+        "entry_timing": entry_timing,
+        "expiry_suggestion": expiry,
+    }
+
+
+def calc_entry_timing(signal, confidence):
+    if confidence >= 85:
+        return "ENTER NOW"
+    elif confidence >= 70:
+        return "WAIT NEXT CANDLE"
+    else:
+        return "NO TRADE"
+
+
+def calc_expiry_suggestion(confidence):
+    if confidence >= 85:
+        return "5 Minutes"
+    elif confidence >= 70:
+        return "10 Minutes"
+    else:
+        return "15 Minutes"
 # ─────────────────────────────────────────────
 # ROUTES
 # ─────────────────────────────────────────────
