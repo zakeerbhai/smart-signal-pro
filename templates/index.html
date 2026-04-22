@@ -2,168 +2,259 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Smart Signal Pro — OTC & Forex Prediction Dashboard</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Smart Signal Pro — Live Trading Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap"/>
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"/>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Syne:wght@700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="/static/style.css"/>
 </head>
 <body>
 
-<!-- ══ HEADER ══ -->
-<header class="header">
-  <div class="header-left">
-    <div class="logo">
-      <span class="logo-icon">◈</span>
-      <span class="logo-text">Smart<span class="accent">Signal</span>Pro</span>
-    </div>
-    <div class="market-status">
-      <span class="status-dot pulse"></span>
-      <span id="market-status-text">SIGNALS LIVE</span>
-    </div>
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-logo">◈ Smart<span>Signal</span>Pro</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage('dashboard')">📊 Dashboard</button>
+    <button class="nav-tab" onclick="showPage('howto')">📖 How To Use</button>
   </div>
-  <div class="header-center">
-    <div class="timeframe-selector">
-      <button class="tf-btn" data-tf="1m">1M</button>
-      <button class="tf-btn active" data-tf="5m">5M</button>
-      <button class="tf-btn" data-tf="15m">15M</button>
-      <button class="tf-btn" data-tf="30m">30M</button>
-    </div>
-  </div>
-  <div class="header-right">
-    <div class="clock" id="clock">00:00:00</div>
+  <div class="nav-right">
+    <span class="live-dot"></span>
+    <span id="live-label" class="live-label">CONNECTING…</span>
+    <span class="clock" id="clock">00:00:00</span>
     <button class="settings-btn" onclick="openSettings()">⚙</button>
   </div>
-</header>
+</nav>
 
-<!-- ══ STATS BAR ══ -->
-<div class="stats-bar">
-  <div class="stat-item"><span class="stat-label">Signals</span><span class="stat-value accent" id="stat-total">0</span></div>
-  <div class="stat-item"><span class="stat-label">Win Rate</span><span class="stat-value win"    id="stat-winrate">—</span></div>
-  <div class="stat-item"><span class="stat-label">Wins</span><span class="stat-value win"         id="stat-wins">0</span></div>
-  <div class="stat-item"><span class="stat-label">Losses</span><span class="stat-value loss"      id="stat-losses">0</span></div>
-  <div class="stat-item"><span class="stat-label">Buy</span><span class="stat-value buy"           id="stat-buys">0</span></div>
-  <div class="stat-item"><span class="stat-label">Sell</span><span class="stat-value sell"         id="stat-sells">0</span></div>
-  <div class="stat-item"><span class="stat-label">Next Update</span><span class="stat-value accent" id="stat-countdown">5:00</span></div>
+<!-- ═══════════════ DASHBOARD PAGE ═══════════════ -->
+<div id="page-dashboard">
+
+<!-- STATS -->
+<div class="statsbar">
+  <div class="s-item"><div class="s-lbl">SIGNALS</div><div class="s-val accent" id="st-total">0</div></div>
+  <div class="s-item"><div class="s-lbl">WIN RATE</div><div class="s-val green" id="st-wr">—</div></div>
+  <div class="s-item"><div class="s-lbl">WINS</div><div class="s-val green" id="st-wins">0</div></div>
+  <div class="s-item"><div class="s-lbl">LOSSES</div><div class="s-val red" id="st-losses">0</div></div>
+  <div class="s-item"><div class="s-lbl">BUY</div><div class="s-val green" id="st-buys">0</div></div>
+  <div class="s-item"><div class="s-lbl">SELL</div><div class="s-val red" id="st-sells">0</div></div>
+  <div class="s-item"><div class="s-lbl">NEXT UPDATE</div><div class="s-val yellow" id="st-cd">5:00</div></div>
 </div>
 
-<!-- ══ MAIN LAYOUT ══ -->
-<main class="main-layout">
-
-  <!-- LEFT: cards -->
-  <section class="signals-section">
-    <div class="section-header">
-      <h2>Live Signals <span class="badge" id="signal-count">0</span></h2>
-      <div class="filter-row">
-        <button class="filter-btn active" data-filter="ALL">All</button>
-        <button class="filter-btn" data-filter="BUY">Buy</button>
-        <button class="filter-btn" data-filter="SELL">Sell</button>
-        <button class="filter-btn" data-filter="WAIT">Wait</button>
-      </div>
+<!-- CONTROLS -->
+<div class="controls">
+  <div class="tf-group">
+    <span class="ctrl-label">TIMEFRAME</span>
+    <div class="tf-btns">
+      <button class="tf active" data-tf="1m">1M</button>
+      <button class="tf" data-tf="5m">5M</button>
+      <button class="tf" data-tf="15m">15M</button>
+      <button class="tf" data-tf="30m">30M</button>
     </div>
-    <div class="signals-grid" id="signals-grid">
-      <div class="loading-state">
-        <div class="spinner"></div>
-        <p>Running prediction engine…</p>
-      </div>
+  </div>
+  <div class="filter-group">
+    <span class="ctrl-label">FILTER</span>
+    <div class="filter-btns">
+      <button class="fb active" data-f="ALL">All</button>
+      <button class="fb" data-f="BUY">Buy</button>
+      <button class="fb" data-f="SELL">Sell</button>
+      <button class="fb" data-f="WAIT">Wait</button>
+    </div>
+  </div>
+  <div class="market-group">
+    <span class="ctrl-label">MARKET</span>
+    <div class="filter-btns">
+      <button class="fb active" data-m="ALL">All</button>
+      <button class="fb" data-m="FOREX">Forex</button>
+      <button class="fb" data-m="CRYPTO">Crypto</button>
+      <button class="fb" data-m="OTC">OTC</button>
+    </div>
+  </div>
+  <button class="refresh-now-btn" onclick="fetchAll()">↻ Refresh Now</button>
+</div>
+
+<!-- MAIN GRID -->
+<div class="main-grid">
+  <!-- Signal cards -->
+  <section class="cards-section">
+    <div class="section-hdr">
+      <h2>Live Signals <span class="badge" id="sig-count">0</span></h2>
+    </div>
+    <div class="cards-grid" id="cards-grid">
+      <div class="loading-box"><div class="spinner"></div><p>Fetching market data…</p></div>
     </div>
   </section>
 
-  <!-- RIGHT: detail panel -->
+  <!-- Detail panel -->
   <aside class="detail-panel">
-
-    <!-- Prediction Chart -->
-    <div class="panel-card chart-card">
-      <div class="card-title">
-        <span>Prediction Chart</span>
-        <span id="chart-asset-label" class="accent">Click a signal card</span>
-      </div>
-      <canvas id="mini-chart" width="360" height="210"></canvas>
-      <div class="chart-legend">
-        <span>◼ History</span>
-        <span style="color:var(--accent)">| NOW |</span>
-        <span style="color:#ffb300">◼ Forecast</span>
-        <span style="opacity:.5">░ Confidence band</span>
-      </div>
+    <div class="d-card">
+      <div class="d-title">PRICE CHART &nbsp;<span id="chart-asset" class="accent-text">—</span></div>
+      <canvas id="chart" width="320" height="180"></canvas>
     </div>
-
-    <!-- Indicator Panel -->
-    <div class="panel-card">
-      <div class="card-title">Indicator Analysis</div>
-      <div class="indicator-grid" id="indicator-grid">
-        <div class="ind-placeholder">Select a signal card to analyse</div>
-      </div>
+    <div class="d-card">
+      <div class="d-title">INDICATOR STATUS</div>
+      <div id="ind-grid"><div class="empty-hint">← Click any signal card</div></div>
     </div>
-
-    <!-- Signal Detail -->
-    <div class="panel-card" id="signal-detail-card" style="display:none">
-      <div class="card-title">Signal Detail</div>
-      <div id="signal-detail-body"></div>
+    <div class="d-card" id="detail-card" style="display:none">
+      <div class="d-title">SIGNAL DETAIL</div>
+      <div id="detail-body"></div>
     </div>
-
   </aside>
-</main>
+</div>
 
-<!-- ══ HISTORY TABLE ══ -->
-<section class="history-section">
-  <div class="section-header">
+<!-- HISTORY -->
+<section class="history-sec">
+  <div class="section-hdr">
     <h2>Signal History</h2>
-    <button class="refresh-btn" onclick="loadHistory()">↻ Refresh</button>
+    <button class="small-btn" onclick="loadHistory()">↻ Refresh</button>
   </div>
-  <div class="table-wrap">
-    <table class="history-table">
-      <thead>
-        <tr>
-          <th>#</th><th>Asset</th><th>Signal</th><th>Strength</th>
-          <th>TF</th><th>Risk</th><th>Confirms</th>
-          <th>Entry</th><th>Target</th><th>Expiry</th>
-          <th>Time</th><th>Result</th>
-        </tr>
-      </thead>
-      <tbody id="history-body">
-        <tr><td colspan="12" class="empty-row">No history yet…</td></tr>
-      </tbody>
+  <div class="tbl-wrap">
+    <table class="htable">
+      <thead><tr>
+        <th>#</th><th>Asset</th><th>Signal</th><th>Strength</th>
+        <th>TF</th><th>Risk</th><th>Confirms</th><th>Price</th><th>Time</th><th>Result</th>
+      </tr></thead>
+      <tbody id="history-body"><tr><td colspan="10" class="empty-cell">No history yet</td></tr></tbody>
     </table>
   </div>
 </section>
 
-<!-- ══ SETTINGS MODAL ══ -->
-<div class="modal-overlay" id="settings-modal" onclick="closeSettingsOutside(event)">
-  <div class="modal">
-    <div class="modal-header">
-      <span>⚙ Admin Settings</span>
-      <button onclick="closeSettings()">✕</button>
+</div><!-- /dashboard -->
+
+<!-- ═══════════════ HOW TO USE PAGE ═══════════════ -->
+<div id="page-howto" style="display:none">
+<div class="guide-wrap">
+
+  <div class="guide-hero">
+    <h1>How To Use Smart Signal Pro</h1>
+    <p>Complete guide to reading signals, placing trades, and managing risk</p>
+  </div>
+
+  <div class="guide-grid">
+
+    <div class="g-card">
+      <div class="g-num">01</div>
+      <h3>Choose Your Timeframe</h3>
+      <p>Select a timeframe that matches your trade duration. The signal and your broker expiry must match.</p>
+      <table class="g-table">
+        <tr><th>Button</th><th>Use For</th><th>Set Expiry</th><th>Reliability</th></tr>
+        <tr><td class="y">1M</td><td>Scalping only</td><td>1–2 min</td><td class="r">Low ⚠</td></tr>
+        <tr><td class="g">5M</td><td>Most trades</td><td>5 min</td><td class="g">High ✓</td></tr>
+        <tr><td class="g">15M</td><td>Trend trades</td><td>15 min</td><td class="g">Highest ✓✓</td></tr>
+        <tr><td class="y">30M</td><td>Swing trades</td><td>30 min</td><td class="y">Medium</td></tr>
+      </table>
+      <div class="tip">💡 Best choice for beginners: <strong>5M timeframe with 5 min expiry</strong></div>
     </div>
-    <div class="modal-body">
-      <div class="settings-grid">
-        <label>RSI Oversold Level
-          <input type="number" id="s-rsi-oversold" min="10" max="40" value="30"/>
-        </label>
-        <label>RSI Overbought Level
-          <input type="number" id="s-rsi-overbought" min="60" max="90" value="70"/>
-        </label>
-        <label>Min Confirmations (6 = high accuracy)
-          <input type="number" id="s-min-conf" min="3" max="10" value="6"/>
-        </label>
-        <label>Signal Window (seconds)
-          <input type="number" id="s-interval" min="60" max="600" value="300"/>
-        </label>
-        <label>LOW Risk Threshold %
-          <input type="number" id="s-risk-low" min="60" max="90" value="70"/>
-        </label>
-        <label>MEDIUM Risk Threshold %
-          <input type="number" id="s-risk-med" min="40" max="70" value="55"/>
-        </label>
+
+    <div class="g-card">
+      <div class="g-num">02</div>
+      <h3>Read the Signal Card</h3>
+      <p>Each asset card shows you everything you need before placing a trade.</p>
+      <div class="card-anatomy">
+        <div class="ca-row"><span class="ca-label">▲ BUY / ▼ SELL</span><span class="ca-desc">Direction of the trade — UP or DOWN</span></div>
+        <div class="ca-row"><span class="ca-label g">87%</span><span class="ca-desc">Signal strength — higher is better, need 75%+</span></div>
+        <div class="ca-row"><span class="ca-label g">LOW RISK</span><span class="ca-desc">Risk level — only trade LOW or MEDIUM</span></div>
+        <div class="ca-row"><span class="ca-label accent">7 confirms</span><span class="ca-desc">How many indicators agree — need 6+</span></div>
+        <div class="ca-row"><span class="ca-label">↗ UPTREND</span><span class="ca-desc">Current market direction</span></div>
+        <div class="ca-row"><span class="ca-label y">LIVE</span><span class="ca-desc">LIVE = real market data · SIM = simulated</span></div>
       </div>
     </div>
-    <div class="modal-footer">
-      <button class="btn-secondary" onclick="closeSettings()">Cancel</button>
-      <button class="btn-primary" onclick="saveSettings()">Save Settings</button>
+
+    <div class="g-card">
+      <div class="g-num">03</div>
+      <h3>The Perfect Trade Checklist</h3>
+      <p>Only take a trade when ALL green conditions are met. Skip any trade with a red condition.</p>
+      <div class="checklist">
+        <div class="chk-row ok">✓ Signal is BUY or SELL — never trade WAIT</div>
+        <div class="chk-row ok">✓ Strength is 75% or above</div>
+        <div class="chk-row ok">✓ Risk shows LOW (MEDIUM is acceptable)</div>
+        <div class="chk-row ok">✓ Confirmations are 6 or more</div>
+        <div class="chk-row ok">✓ Trend matches signal direction</div>
+        <div class="chk-row ok">✓ Heiken Ashi matches signal</div>
+        <div class="chk-row no">✗ Do NOT trade HIGH RISK signals</div>
+        <div class="chk-row no">✗ Do NOT trade during major news (NFP, rate decisions)</div>
+        <div class="chk-row no">✗ Do NOT trade if signal just refreshed — wait 60 seconds</div>
+      </div>
+    </div>
+
+    <div class="g-card">
+      <div class="g-num">04</div>
+      <h3>Step-by-Step Trade Entry</h3>
+      <div class="steps">
+        <div class="step"><div class="step-n">1</div><div><strong>Open Dashboard</strong> — select 5M timeframe</div></div>
+        <div class="step"><div class="step-n">2</div><div><strong>Find a BUY or SELL card</strong> with strength ≥75% and LOW risk</div></div>
+        <div class="step"><div class="step-n">3</div><div><strong>Click the card</strong> — check the Indicator panel. Confirm 6+ indicators agree</div></div>
+        <div class="step"><div class="step-n">4</div><div><strong>Note the entry advice</strong> shown on the card (e.g. "Enter NOW")</div></div>
+        <div class="step"><div class="step-n">5</div><div><strong>Open your broker</strong> (Quotex/IQ Option) — select the same asset</div></div>
+        <div class="step"><div class="step-n">6</div><div>Set expiry to <strong>5 minutes</strong> (or match your timeframe)</div></div>
+        <div class="step"><div class="step-n">7</div><div>BUY signal → press <strong class="g">UP ▲</strong> &nbsp;|&nbsp; SELL signal → press <strong class="r">DOWN ▼</strong></div></div>
+        <div class="step"><div class="step-n">8</div><div>After expiry — mark WIN or LOSS in the <strong>Signal History</strong> table</div></div>
+      </div>
+    </div>
+
+    <div class="g-card">
+      <div class="g-num">05</div>
+      <h3>What Each Indicator Means</h3>
+      <div class="ind-guide">
+        <div class="ig-row"><span class="ig-name">RSI</span><span class="ig-desc">Below 30 = oversold → expect price bounce UP. Above 70 = overbought → expect price drop DOWN.</span></div>
+        <div class="ig-row"><span class="ig-name">MACD</span><span class="ig-desc">When MACD line crosses above signal = bullish momentum (BUY). Crosses below = bearish (SELL).</span></div>
+        <div class="ig-row"><span class="ig-name">Bollinger</span><span class="ig-desc">Price touching lower band = bounce expected (BUY). Price at upper band = reversal expected (SELL).</span></div>
+        <div class="ig-row"><span class="ig-name">Stochastic</span><span class="ig-desc">K below 20 = oversold zone (BUY). K above 80 = overbought zone (SELL). Both K and D must agree.</span></div>
+        <div class="ig-row"><span class="ig-name">EMA/SMA</span><span class="ig-desc">Fast EMA above slow SMA = uptrend active (BUY). Below = downtrend active (SELL).</span></div>
+        <div class="ig-row"><span class="ig-name">Heiken Ashi</span><span class="ig-desc">2+ consecutive green HA candles = strong uptrend. 2+ red = strong downtrend. Very reliable confirmation.</span></div>
+        <div class="ig-row"><span class="ig-name">S/R Level</span><span class="ig-desc">Price near support = likely bounce up. Price near resistance = likely reversal down. Price loves these zones.</span></div>
+        <div class="ig-row"><span class="ig-name">Candle Pattern</span><span class="ig-desc">Hammer/Engulfing at support = strong BUY. Shooting Star/Engulfing at resistance = strong SELL.</span></div>
+      </div>
+    </div>
+
+    <div class="g-card">
+      <div class="g-num">06</div>
+      <h3>Money Management — Most Important</h3>
+      <div class="money-rules">
+        <div class="mr-box green-box">
+          <div class="mr-title">✓ DO THIS</div>
+          <div class="mr-item">Bet only 2–3% of balance per trade</div>
+          <div class="mr-item">On ₹10,000 → max ₹200–300 per trade</div>
+          <div class="mr-item">Max 3 trades per session</div>
+          <div class="mr-item">Stop after 2 losses in a row — take a break</div>
+          <div class="mr-item">Stop if you lose 10% of your balance in one day</div>
+          <div class="mr-item">Only trade signals with 75%+ strength</div>
+        </div>
+        <div class="mr-box red-box">
+          <div class="mr-title">✗ NEVER DO THIS</div>
+          <div class="mr-item">Never double your bet to recover a loss (Martingale)</div>
+          <div class="mr-item">Never trade with money you need for living</div>
+          <div class="mr-item">Never trade more than 3 times in a row</div>
+          <div class="mr-item">Never trade HIGH RISK signals</div>
+          <div class="mr-item">Never trade against the trend direction</div>
+        </div>
+      </div>
+      <div class="tip r-tip">⚠ OTC pairs have no real market — the broker controls the price. Trade real forex pairs (EUR/USD, GBP/USD) when possible for more reliable signals.</div>
+    </div>
+
+  </div><!-- /guide-grid -->
+</div><!-- /guide-wrap -->
+</div><!-- /howto -->
+
+<!-- SETTINGS MODAL -->
+<div class="modal-bg" id="modal-bg" onclick="closeSettingsOutside(event)">
+  <div class="modal">
+    <div class="modal-hdr"><span>⚙ Settings</span><button onclick="closeSettings()">✕</button></div>
+    <div class="modal-body">
+      <div class="sg">
+        <label>RSI Oversold<input type="number" id="s-ros" min="10" max="40" value="30"/></label>
+        <label>RSI Overbought<input type="number" id="s-rob" min="60" max="90" value="70"/></label>
+        <label>Min Confirmations<input type="number" id="s-mc" min="2" max="8" value="4"/></label>
+        <label>Low Risk Threshold %<input type="number" id="s-rl" min="50" max="70" value="60"/></label>
+        <label>Med Risk Threshold %<input type="number" id="s-rm" min="70" max="90" value="75"/></label>
+      </div>
+    </div>
+    <div class="modal-ftr">
+      <button class="btn-sec" onclick="closeSettings()">Cancel</button>
+      <button class="btn-pri" onclick="saveSettings()">Save</button>
     </div>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
-<script src="{{ url_for('static', filename='script.js') }}"></script>
+<script src="/static/script.js"></script>
 </body>
 </html>
