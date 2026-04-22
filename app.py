@@ -1,6 +1,6 @@
 """
 Smart Signal Pro — FINAL VERSION
-Real forex data: Alpha Vantage (dd455a151e4f440f86cf64c77511b5d7)
+Real forex data: Alpha Vantage (QDPMSJTAE3WVURK3)
 OTC pairs: seeded simulation (stable per 5-min window)
 12 indicators, min 4 confirmations required
 """
@@ -15,7 +15,7 @@ except:
 app = Flask(__name__)
 DB = "signals.db"
 
-AV_KEY = "dd455a151e4f440f86cf64c77511b5d7"
+AV_KEY = "QDPMSJTAE3WVURK3"
 
 FOREX  = ["EUR/USD","GBP/USD","USD/JPY","AUD/USD","USD/CHF","NZD/USD","EUR/GBP","USD/CAD"]
 CRYPTO = ["BTC/USD","ETH/USD","XRP/USD"]
